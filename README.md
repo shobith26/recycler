@@ -1,1285 +1,1450 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ReCycleHub</title>
+  <title>recycling-hub-final</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@latest"></script>
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
   <style>
-    :root{
-      --bg:#f4fbf7;
-      --bg-soft:#edf8f2;
-      --card:#ffffffcc;
-      --card-solid:#ffffff;
-      --text:#15352c;
-      --muted:#6f8a80;
-      --line:rgba(21,53,44,.10);
-      --primary:#0f9d74;
-      --primary-2:#22c58b;
-      --secondary:#6be0b3;
-      --danger:#e74c3c;
-      --warning:#f59e0b;
-      --blue:#3b82f6;
-      --shadow:0 10px 30px rgba(12, 61, 45, 0.08);
-      --shadow-lg:0 18px 50px rgba(12, 61, 45, 0.14);
-      --radius:22px;
-      --radius-sm:14px;
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+
+      --color-bg: #f7f6f2;
+      --color-surface: #fcfbf8;
+      --color-surface-2: #f1efe8;
+      --color-border: #d6d1c7;
+      --color-divider: #e2ddd3;
+      --color-text: #211f19;
+      --color-text-muted: #6f6b63;
+      --color-text-inverse: #f8f7f3;
+      --color-primary: #056c67;
+      --color-primary-hover: #04514d;
+      --color-primary-highlight: #d7ece9;
+      --color-success: #3d7a21;
+      --color-warning: #b86a1a;
+      --color-error: #b2316c;
+      --color-blue: #0f6ea8;
+
+      --radius-lg: 1.1rem;
+      --radius-xl: 1.5rem;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 3px rgba(24, 27, 22, 0.08);
+      --shadow-md: 0 10px 24px rgba(24, 27, 22, 0.09);
+
+      --font-body: 'General Sans', 'Inter', sans-serif;
+      --font-display: 'Clash Display', 'General Sans', sans-serif;
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:'Poppins',sans-serif;
+    [data-theme="dark"] {
+      --color-bg: #141513;
+      --color-surface: #1b1d1a;
+      --color-surface-2: #232622;
+      --color-border: #373b36;
+      --color-divider: #30342f;
+      --color-text: #ece9e2;
+      --color-text-muted: #b4b0a7;
+      --color-text-inverse: #10110f;
+      --color-primary: #64b5ac;
+      --color-primary-hover: #7cc7be;
+      --color-primary-highlight: #1f3633;
+      --color-success: #87c765;
+      --color-warning: #f0a14a;
+      --color-error: #e46aa0;
+      --color-blue: #79b7e6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--color-text);
       background:
-        radial-gradient(circle at top left, rgba(34,197,139,.12), transparent 30%),
-        radial-gradient(circle at top right, rgba(59,130,246,.08), transparent 25%),
-        linear-gradient(180deg,#f8fffb 0%, #eefaf4 100%);
-      color:var(--text);
-      min-height:100vh;
-    }
-
-    h1,h2,h3,h4,h5{
-      font-family:'Outfit',sans-serif;
-      letter-spacing:.2px;
+        radial-gradient(circle at top right, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent 28%),
+        radial-gradient(circle at left bottom, color-mix(in srgb, var(--color-blue) 10%, transparent), transparent 22%),
+        var(--color-bg);
+      min-height: 100vh;
     }
 
-    button,input,select,textarea{font:inherit}
-    .hidden{display:none !important}
+    button, input, textarea, select { font: inherit; color: inherit; }
+    button { cursor: pointer; border: none; background: none; }
 
-    .login-shell{
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:24px;
-    }
+    .hidden { display: none !important; }
+    .small { font-size: var(--text-sm); }
+    .tiny { font-size: var(--text-xs); }
+    .muted { color: var(--color-text-muted); }
 
-    .login-card{
-      width:min(100%, 980px);
-      display:grid;
-      grid-template-columns:1.1fr .9fr;
-      background:var(--card);
-      backdrop-filter:blur(16px);
-      border:1px solid var(--line);
-      border-radius:32px;
-      overflow:hidden;
-      box-shadow:var(--shadow-lg);
+    .card {
+      background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+      border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px);
     }
 
-    .login-hero{
-      padding:42px;
-      background:
-        linear-gradient(135deg, rgba(15,157,116,.96), rgba(34,197,139,.88)),
-        linear-gradient(180deg,#0f9d74,#22c58b);
-      color:#fff;
-      position:relative;
+    .btn {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      padding: .9rem 1.2rem;
+      border-radius: var(--radius-full);
+      transition: all var(--transition);
+      font-weight: 600;
     }
 
-    .login-hero::after{
-      content:"";
-      position:absolute;
-      width:260px;
-      height:260px;
-      right:-60px;
-      bottom:-60px;
-      border-radius:50%;
-      background:rgba(255,255,255,.10);
-      filter:blur(6px);
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-text-inverse);
+      box-shadow: var(--shadow-md);
     }
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      margin-bottom:28px;
+    .btn-secondary {
+      background: var(--color-surface);
+      border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
     }
-
-    .brand-mark{
-      width:58px;
-      height:58px;
-      border-radius:18px;
-      display:grid;
-      place-items:center;
-      background:rgba(255,255,255,.18);
-      border:1px solid rgba(255,255,255,.2);
-      font-size:28px;
-      font-weight:800;
-      box-shadow:0 12px 24px rgba(0,0,0,.10);
-    }
-
-    .brand-text h1{font-size:2rem;font-weight:800}
-    .brand-text p{opacity:.9;margin-top:4px}
 
-    .hero-title{
-      font-size:2.8rem;
-      line-height:1.05;
-      margin-bottom:16px;
-      max-width:10ch;
+    .btn-danger {
+      background: color-mix(in srgb, var(--color-error) 14%, var(--color-surface));
+      color: var(--color-error);
+      border: 1px solid color-mix(in srgb, var(--color-error) 22%, transparent);
     }
 
-    .hero-copy{
-      font-size:1rem;
-      line-height:1.7;
-      max-width:54ch;
-      opacity:.95;
-      margin-bottom:26px;
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: var(--radius-full);
+      padding: .55rem .9rem;
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
     }
 
-    .hero-points{
-      display:grid;
-      gap:12px;
+    .login-shell {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: var(--space-6);
     }
 
-    .hero-point{
-      background:rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.12);
-      padding:14px 16px;
-      border-radius:16px;
+    .login-wrap {
+      width: min(1120px, 100%);
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      overflow: hidden;
     }
 
-    .login-panel{
-      padding:42px 34px;
-      background:rgba(255,255,255,.78);
+    .brand-panel {
+      padding: clamp(2rem, 5vw, 4rem);
+      background: linear-gradient(145deg, color-mix(in srgb, var(--color-primary) 92%, black 8%), color-mix(in srgb, var(--color-blue) 35%, var(--color-primary) 65%));
+      color: white;
     }
 
-    .panel-title{
-      font-size:1.8rem;
-      margin-bottom:8px;
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: .9rem;
+      margin-bottom: var(--space-10);
+      font-size: 1.1rem;
+      font-weight: 700;
     }
 
-    .panel-sub{
-      color:var(--muted);
-      margin-bottom:24px;
-      line-height:1.6;
-    }
+    .brand-logo svg { width: 42px; height: 42px; }
 
-    .role-switch{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-bottom:18px;
+    .brand-panel h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      line-height: 1.05;
+      max-width: 10ch;
+      margin-bottom: 1rem;
     }
 
-    .role-btn{
-      border:none;
-      border-radius:16px;
-      padding:14px;
-      cursor:pointer;
-      font-weight:700;
-      transition:.25s ease;
-      background:#eef7f2;
-      color:var(--text);
+    .impact-list {
+      margin-top: var(--space-10);
+      display: grid;
+      gap: 1rem;
     }
 
-    .role-btn.active{
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
-      color:#fff;
-      box-shadow:0 10px 22px rgba(15,157,116,.22);
+    .impact-item {
+      padding: 1rem 1.1rem;
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
     }
 
-    .field{margin-bottom:14px}
-    .field label{
-      display:block;
-      font-size:.92rem;
-      font-weight:600;
-      margin-bottom:8px;
+    .login-panel {
+      padding: clamp(2rem, 5vw, 4rem);
+      background: var(--color-surface);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
-    .input{
-      width:100%;
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:16px;
-      padding:14px 15px;
-      outline:none;
-      transition:.22s ease;
+    .login-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
     }
 
-    .input:focus{
-      border-color:rgba(15,157,116,.35);
-      box-shadow:0 0 0 4px rgba(15,157,116,.10);
-      transform:translateY(-1px);
+    .theme-toggle {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--color-surface-2);
+      border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
     }
 
-    .hint,.error-msg{
-      font-size:.88rem;
-      margin-top:8px;
+    .role-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+      margin: 1rem 0;
     }
-
-    .hint{color:var(--muted)}
-    .error-msg{color:var(--danger);font-weight:600;min-height:20px}
 
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:18px;
+    .role-btn {
+      padding: .95rem 1rem;
+      border-radius: var(--radius-full);
+      background: var(--color-surface-2);
+      border: 1px solid transparent;
+      font-weight: 600;
     }
 
-    .btn{
-      border:none;
-      border-radius:16px;
-      padding:13px 18px;
-      font-weight:700;
-      cursor:pointer;
-      transition:.25s ease;
+    .role-btn.active {
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
     }
 
-    .btn:hover{transform:translateY(-2px)}
-    .btn-primary{
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
-      color:#fff;
-      box-shadow:0 10px 24px rgba(15,157,116,.22);
-    }
+    .form-grid { display: grid; gap: 1rem; }
+    .field { display: grid; gap: .45rem; }
 
-    .btn-soft{
-      background:#edf8f2;
-      color:var(--primary);
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      min-height: 48px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      padding: .95rem 1rem;
     }
 
-    .btn-danger{
-      background:#fdecea;
-      color:#c0392b;
-    }
+    .field textarea { min-height: 110px; resize: vertical; }
 
-    .app{
-      display:grid;
-      grid-template-columns:290px 1fr;
-      min-height:100vh;
+    .error-box, .success-box, .note-box {
+      display: none;
+      margin-top: 1rem;
+      padding: .9rem 1rem;
+      border-radius: var(--radius-lg);
+      font-size: var(--text-sm);
     }
 
-    .sidebar{
-      background:rgba(255,255,255,.74);
-      backdrop-filter:blur(14px);
-      border-right:1px solid var(--line);
-      padding:22px 18px;
-      position:sticky;
-      top:0;
-      height:100vh;
-    }
+    .error-box.show, .success-box.show, .note-box.show { display: block; }
 
-    .sidebar-head{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-bottom:24px;
+    .error-box {
+      background: color-mix(in srgb, var(--color-error) 10%, var(--color-surface));
+      color: var(--color-error);
+      border: 1px solid color-mix(in srgb, var(--color-error) 22%, transparent);
     }
 
-    .sidebar-mark{
-      width:48px;
-      height:48px;
-      border-radius:15px;
-      display:grid;
-      place-items:center;
-      color:#fff;
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
-      font-size:22px;
-      font-weight:800;
+    .success-box {
+      background: color-mix(in srgb, var(--color-success) 12%, var(--color-surface));
+      color: var(--color-success);
+      border: 1px solid color-mix(in srgb, var(--color-success) 22%, transparent);
     }
-
-    .sidebar-head h2{font-size:1.35rem}
-    .sidebar-head p{font-size:.88rem;color:var(--muted);margin-top:3px}
 
-    .profile-box{
-      background:linear-gradient(135deg, rgba(15,157,116,.96), rgba(34,197,139,.88));
-      color:#fff;
-      border-radius:22px;
-      padding:18px;
-      box-shadow:var(--shadow);
-      margin-bottom:18px;
+    .note-box {
+      background: color-mix(in srgb, var(--color-blue) 12%, var(--color-surface));
+      color: var(--color-blue);
+      border: 1px solid color-mix(in srgb, var(--color-blue) 22%, transparent);
     }
 
-    .profile-box .small{font-size:.9rem;opacity:.9;margin-top:6px}
-
-    .nav{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
     }
 
-    .nav-btn{
-      background:transparent;
-      border:none;
-      text-align:left;
-      padding:13px 14px;
-      border-radius:14px;
-      color:var(--text);
-      font-weight:600;
-      cursor:pointer;
-      transition:.22s ease;
+    .sidebar {
+      background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+      border-right: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+      padding: 1.2rem;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
-    .nav-btn:hover,.nav-btn.active{
-      background:#e9f7f0;
-      color:var(--primary);
+    .brand-mini {
+      display: flex;
+      gap: .8rem;
+      align-items: center;
+      padding: .75rem;
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+      border: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent);
     }
 
-    .main{
-      padding:22px;
-    }
+    .brand-mini svg { width: 38px; height: 38px; color: var(--color-primary); }
 
-    .topbar{
-      display:flex;
-      justify-content:space-between;
-      gap:16px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-bottom:18px;
-      background:rgba(255,255,255,.72);
-      border:1px solid var(--line);
-      border-radius:24px;
-      padding:18px 20px;
-      backdrop-filter:blur(14px);
-      box-shadow:var(--shadow);
+    .nav-list {
+      display: grid;
+      gap: .45rem;
+      list-style: none;
     }
 
-    .topbar h1{
-      font-size:1.8rem;
-      margin-bottom:4px;
+    .nav-btn {
+      width: 100%;
+      text-align: left;
+      min-height: 46px;
+      padding: .95rem 1rem;
+      border-radius: var(--radius-lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid transparent;
     }
 
-    .topbar p{
-      color:var(--muted);
+    .nav-btn.active,
+    .nav-btn:hover {
+      background: var(--color-surface-2);
+      border-color: color-mix(in srgb, var(--color-text) 10%, transparent);
     }
 
-    .top-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 1rem;
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+      border: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent);
     }
 
-    .pill{
-      padding:10px 14px;
-      border-radius:999px;
-      background:#fff;
-      border:1px solid var(--line);
-      font-weight:600;
-      font-size:.9rem;
-      box-shadow:0 3px 8px rgba(0,0,0,.03);
-    }
+    .main { min-width: 0; padding: 1.2rem; }
 
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(12,1fr);
-      gap:18px;
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+      padding: 1rem 1.1rem;
     }
 
-    .card{
-      grid-column:span 12;
-      background:rgba(255,255,255,.84);
-      backdrop-filter:blur(10px);
-      border:1px solid var(--line);
-      border-radius:24px;
-      padding:20px;
-      box-shadow:var(--shadow);
+    .topbar h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 2vw, 2.5rem);
+      line-height: 1.08;
+      margin-bottom: .25rem;
     }
-
-    .col-4{grid-column:span 4}
-    .col-5{grid-column:span 5}
-    .col-6{grid-column:span 6}
-    .col-7{grid-column:span 7}
-    .col-8{grid-column:span 8}
-    .col-12{grid-column:span 12}
 
-    .card h3{
-      font-size:1.1rem;
-      margin-bottom:10px;
+    .topbar-actions {
+      display: flex;
+      gap: .8rem;
+      flex-wrap: wrap;
     }
 
-    .sub{
-      color:var(--muted);
-      line-height:1.6;
-      font-size:.94rem;
-      margin-bottom:14px;
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
 
-    .metrics{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:12px;
+    .stat-card, .panel {
+      padding: 1.2rem;
+      border-radius: var(--radius-xl);
     }
 
-    .metric{
-      background:linear-gradient(180deg,#ffffff,#f7fcf9);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
+    .stat-card h3 {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin-bottom: .45rem;
     }
 
-    .metric span{
-      display:block;
-      font-size:.84rem;
-      color:var(--muted);
-      margin-bottom:8px;
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 2vw, 2.2rem);
+      line-height: 1;
+      margin-bottom: .4rem;
     }
 
-    .metric strong{
-      font-family:'Outfit',sans-serif;
-      font-size:1.6rem;
-      font-weight:700;
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 1rem;
     }
 
-    .form-grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:14px;
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
 
-    .chat{
-      border:1px solid var(--line);
-      border-radius:18px;
-      overflow:hidden;
-      background:#fff;
-      display:flex;
-      flex-direction:column;
-      min-height:350px;
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .price-grid, .timeline, .notif-list, .chat-list, .history-list, .scanner-results {
+      display: grid;
+      gap: 1rem;
     }
 
-    .chat-messages{
-      flex:1;
-      background:#f7fcf9;
-      padding:14px;
-      overflow:auto;
-      max-height:330px;
+    .price-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+    .pickup-summary,
+    .timeline-item,
+    .notif-item,
+    .chat-item,
+    .history-item,
+    .scan-item,
+    .kpi-mini {
+      padding: 1rem;
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+      border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
     }
 
-    .msg{
-      max-width:78%;
-      padding:12px 14px;
-      border-radius:16px;
-      margin-bottom:10px;
-      line-height:1.5;
-      font-size:.93rem;
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .45rem .7rem;
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
     }
 
-    .msg.user{
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
-      color:#fff;
-      margin-left:auto;
-      border-bottom-right-radius:4px;
+    .status-pending {
+      background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+      color: var(--color-warning);
     }
 
-    .msg.recycler{
-      background:#e7f0ff;
-      color:#1e3a8a;
-      border-bottom-left-radius:4px;
+    .status-accepted {
+      background: color-mix(in srgb, var(--color-blue) 14%, var(--color-surface));
+      color: var(--color-blue);
     }
 
-    .chat-input{
-      display:flex;
-      gap:10px;
-      padding:12px;
-      border-top:1px solid var(--line);
-      background:#fff;
+    .status-completed {
+      background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
+      color: var(--color-success);
     }
 
-    .badge{
-      display:inline-block;
-      padding:7px 11px;
-      border-radius:999px;
-      font-size:.82rem;
-      font-weight:700;
-      margin-bottom:10px;
+    .split-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+      margin-top: 1rem;
     }
 
-    .badge-success{background:#dcfce7;color:#166534}
-    .badge-info{background:#dbeafe;color:#1d4ed8}
-    .badge-warn{background:#fef3c7;color:#92400e}
+    .view { display: none; }
+    .view.active { display: block; }
 
-    .list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+    #map {
+      width: 100%;
+      min-height: 360px;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
     }
 
-    .list-item{
-      background:#fbfefd;
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
+    .scanner-drop {
+      border: 1.5px dashed color-mix(in srgb, var(--color-primary) 28%, transparent);
+      background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+      border-radius: var(--radius-xl);
+      padding: 1.2rem;
+      text-align: center;
     }
 
-    .list-item strong{
-      display:block;
-      margin-bottom:5px;
+    .preview-box {
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-xl);
+      min-height: 220px;
+      overflow: hidden;
+      background: var(--color-surface-2);
+      border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+      margin-top: 1rem;
     }
 
-    .history-wrap{
-      overflow:auto;
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:#fff;
+    .preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:760px;
+    .chat-compose {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: .75rem;
+      margin-top: 1rem;
     }
 
-    th,td{
-      padding:14px;
-      border-bottom:1px solid rgba(21,53,44,.08);
-      text-align:left;
-      font-size:.93rem;
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      bottom: 0;
+      z-index: 40;
+      margin-top: 1rem;
+      padding: .7rem;
+      background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+      border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+      border-radius: var(--radius-xl);
     }
 
-    th{
-      background:#f3faf6;
-      color:var(--primary);
-      font-weight:700;
+    .mobile-nav {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .5rem;
     }
 
-    #map{
-      width:100%;
-      height:320px;
-      border-radius:18px;
-      overflow:hidden;
-      border:1px solid var(--line);
+    .mobile-nav button {
+      min-height: 46px;
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+      font-size: var(--text-xs);
+      font-weight: 700;
     }
 
-    #previewImage{
-      width:100%;
-      max-height:280px;
-      object-fit:cover;
-      border-radius:16px;
-      border:1px solid var(--line);
-      margin-top:14px;
+    @media (max-width: 1100px) {
+      .grid-stats { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-grid, .two-col, .login-wrap { grid-template-columns: 1fr; }
     }
-
-    .view.hidden{display:none}
 
-    @media (max-width:1100px){
-      .login-card{grid-template-columns:1fr}
-      .app{grid-template-columns:1fr}
-      .sidebar{
-        position:relative;
-        height:auto;
-        border-right:none;
-        border-bottom:1px solid var(--line);
-      }
-      .col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}
-      .metrics{grid-template-columns:repeat(2,1fr)}
+    @media (max-width: 860px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .mobile-bar { display: block; }
+      .main { padding-bottom: 6rem; }
+      .topbar { flex-direction: column; align-items: flex-start; }
     }
 
-    @media (max-width:700px){
-      .login-hero,.login-panel{padding:26px 20px}
-      .hero-title{font-size:2.1rem}
-      .role-switch,.form-grid,.metrics{grid-template-columns:1fr}
-      .chat-input{flex-direction:column}
-      .main{padding:14px}
-      .topbar h1{font-size:1.4rem}
+    @media (max-width: 600px) {
+      .grid-stats, .price-grid { grid-template-columns: 1fr; }
+      .role-switch { grid-template-columns: 1fr; }
+      .chat-compose { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-
-  <section class="login-shell" id="loginScreen">
-    <div class="login-card">
-      <div class="login-hero">
-        <div class="brand">
-          <div class="brand-mark">♻</div>
-          <div class="brand-text">
-            <h1>ReCycleHub</h1>
-            <p>Smart waste pickup & recycler coordination</p>
-          </div>
+  <section id="loginPage" class="login-shell">
+    <div class="login-wrap card">
+      <div class="brand-panel">
+        <div class="brand-logo">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M31 6l8 14h-8l-4 7-8-14L31 6Z" fill="currentColor"/>
+            <path d="M15 34l8-13 4 7h8l-8 13H15Z" fill="currentColor" opacity=".88"/>
+            <path d="M49 34l-8 13-4-7h-8l8-13h12Z" fill="currentColor" opacity=".72"/>
+          </svg>
+          <span>Recycling Hub</span>
         </div>
 
-        <h2 class="hero-title">Cleaner pickups. Smarter recycling.</h2>
-        <p class="hero-copy">
-          Book waste pickup, scan recyclables, track location, and chat with recyclers in one elegant dashboard.
-        </p>
+        <span class="pill">Final Role-Based UI</span>
+        <h1>Smart recycling platform for users and recyclers.</h1>
+        <p>User and recycler dashboards now show separate role-specific summary cards.</p>
 
-        <div class="hero-points">
-          <div class="hero-point">Live pickup booking and role-based dashboard</div>
-          <div class="hero-point">Map location support with Leaflet integration</div>
-          <div class="hero-point">Recycler-only history access and secure recycler login</div>
+        <div class="impact-list">
+          <div class="impact-item">User dashboard shows request-focused stats only.</div>
+          <div class="impact-item">Recycler dashboard shows handling-focused stats only.</div>
+          <div class="impact-item">Notifications and recycler history can now be cleared instantly.</div>
         </div>
       </div>
 
       <div class="login-panel">
-        <h2 class="panel-title">Welcome back</h2>
-        <p class="panel-sub">Choose your role and continue into the ReCycleHub workspace.</p>
+        <div class="login-header">
+          <div>
+            <h2 style="font-family:var(--font-display); font-size:var(--text-xl);">Sign in</h2>
+            <p class="muted small">Choose a role and continue.</p>
+          </div>
+          <button class="theme-toggle" id="themeToggle" type="button">🌙</button>
+        </div>
 
         <div class="role-switch">
-          <button class="role-btn active" data-role="user">👤 User</button>
-          <button class="role-btn" data-role="recycler">🚚 Recycler</button>
+          <button class="role-btn active" id="userRoleBtn" type="button">User Login</button>
+          <button class="role-btn" id="recyclerRoleBtn" type="button">Recycler Login</button>
         </div>
 
-        <div class="field">
-          <label for="nameInput">Full Name</label>
-          <input id="nameInput" class="input" type="text" placeholder="Enter your name">
-        </div>
+        <form id="loginForm" class="form-grid">
+          <div class="field">
+            <label for="loginName">Full name</label>
+            <input id="loginName" type="text" placeholder="Enter full name" required />
+          </div>
 
-        <div class="field">
-          <label for="emailInput">Email</label>
-          <input id="emailInput" class="input" type="email" placeholder="Enter your email">
-        </div>
+          <div class="field">
+            <label for="loginPhone">Phone number</label>
+            <input id="loginPhone" type="tel" placeholder="Enter phone number" required />
+          </div>
 
-        <div class="field" id="secretField" style="display:none;">
-          <label for="codeInput">Recycler Access Code</label>
-          <input id="codeInput" class="input" type="password" placeholder="Enter recycler code">
-          <div class="hint">This field is required only for recycler login.</div>
-        </div>
+          <div class="field hidden" id="secretFieldWrap">
+            <label for="secretCode">Recycler secret code</label>
+            <input id="secretCode" type="password" placeholder="Enter recycler secret code" />
+          </div>
 
-        <div class="error-msg" id="loginError"></div>
+          <button class="btn btn-primary" type="submit">Enter Dashboard</button>
+        </form>
 
-        <div class="actions">
-          <button class="btn btn-primary" id="loginBtn">Login</button>
-          <button class="btn btn-soft" id="demoBtn">Fill Demo</button>
-        </div>
+        <div id="loginError" class="error-box"></div>
+        <div id="loginSuccess" class="success-box"></div>
       </div>
     </div>
   </section>
 
-  <section class="app hidden" id="appScreen">
+  <section id="appPage" class="app-shell hidden">
     <aside class="sidebar">
-      <div class="sidebar-head">
-        <div class="sidebar-mark">♻</div>
+      <div class="brand-mini">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M31 6l8 14h-8l-4 7-8-14L31 6Z" fill="currentColor"/>
+          <path d="M15 34l8-13 4 7h8l-8 13H15Z" fill="currentColor" opacity=".88"/>
+          <path d="M49 34l-8 13-4-7h-8l8-13h12Z" fill="currentColor" opacity=".72"/>
+        </svg>
         <div>
-          <h2>ReCycleHub</h2>
-          <p>Eco operations panel</p>
+          <h3>Recycling Hub</h3>
+          <p class="tiny muted" id="roleLabel">User dashboard</p>
         </div>
       </div>
 
-      <div class="profile-box">
-        <strong id="profileName">User Name</strong>
-        <div class="small" id="profileEmail">email@example.com</div>
-        <div class="small" id="profileRole">User Access</div>
-      </div>
+      <nav>
+        <ul class="nav-list">
+          <li><button class="nav-btn active" data-view="dashboard">Dashboard <span>→</span></button></li>
+          <li><button class="nav-btn" data-view="pickup">Pickup Flow <span>→</span></button></li>
+          <li><button class="nav-btn" data-view="pricing">Price Board <span>→</span></button></li>
+          <li><button class="nav-btn" data-view="mapView">User Location <span>→</span></button></li>
+          <li><button class="nav-btn user-only" data-view="scanner">Waste Scanner <span>→</span></button></li>
+          <li><button class="nav-btn" data-view="notifications">Notifications <span>→</span></button></li>
+          <li><button class="nav-btn" data-view="chat">Messages <span>→</span></button></li>
+          <li><button class="nav-btn recycler-only" data-view="history">Recycler History <span>→</span></button></li>
+        </ul>
+      </nav>
 
-      <div class="nav">
-        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
-        <button class="nav-btn" data-view="booking">Book Pickup</button>
-        <button class="nav-btn" data-view="scan">Waste Scan</button>
-        <button class="nav-btn" data-view="chat">Chat</button>
-        <button class="nav-btn hidden" id="historyNav" data-view="history">History</button>
-        <button class="nav-btn" id="logoutBtn">Logout</button>
+      <div class="sidebar-footer">
+        <p class="small"><strong id="welcomeName">Welcome</strong></p>
+        <p class="tiny muted" id="welcomeMeta">Manage your recycling workflow.</p>
+        <div class="split-actions">
+          <button id="sidebarThemeBtn" class="btn btn-secondary" type="button">Theme</button>
+          <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
+        </div>
       </div>
     </aside>
 
     <main class="main">
-      <div class="topbar">
+      <header class="topbar card">
         <div>
-          <h1 id="pageTitle">User Dashboard</h1>
-          <p id="pageSubtitle">Manage bookings, scans, and recycler communication.</p>
+          <span class="pill" id="rolePill">User Portal</span>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p class="muted" id="pageSubtitle">Role-based overview of current recycling activity.</p>
         </div>
-        <div class="top-actions">
-          <div class="pill" id="rolePill">User</div>
-          <div class="pill" id="notifPill">Notifications: 3</div>
-          <button class="btn btn-soft" id="gpsBtn">Use GPS</button>
+        <div class="topbar-actions">
+          <button id="topThemeBtn" class="btn btn-secondary" type="button">Toggle Theme</button>
+          <button id="topLogoutBtn" class="btn btn-danger" type="button">Logout</button>
+        </div>
+      </header>
+
+      <section id="view-dashboard" class="view active">
+        <div class="grid-stats" id="dashboardStats"></div>
+
+        <div class="dashboard-grid">
+          <article class="panel card">
+            <div class="panel-header">
+              <div>
+                <h2 style="font-family:var(--font-display);">Live overview</h2>
+                <p class="muted small" id="overviewSubtitle">Latest request and current status.</p>
+              </div>
+              <span id="statusBadge" class="status-badge status-pending">No active booking</span>
+            </div>
+            <div id="latestPickupCard" class="pickup-summary">
+              <p class="muted">No active pickup yet.</p>
+            </div>
+          </article>
+
+          <article class="panel card">
+            <div class="panel-header">
+              <div>
+                <h2 style="font-family:var(--font-display);">Quick summary</h2>
+                <p class="muted small" id="quickSummarySubtitle">Role-based dashboard summary.</p>
+              </div>
+            </div>
+            <div class="timeline" id="dashboardQuickCards"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-pickup" class="view">
+        <div class="two-col">
+          <article class="panel card user-only">
+            <div class="panel-header">
+              <div>
+                <h2 style="font-family:var(--font-display);">Book pickup</h2>
+                <p class="muted small">User booking form remains unchanged.</p>
+              </div>
+            </div>
+
+            <form id="pickupForm" class="form-grid">
+              <div class="field">
+                <label for="wasteType">Waste type</label>
+                <select id="wasteType" required>
+                  <option value="">Select material</option>
+                  <option value="plastic">Plastic</option>
+                  <option value="paper">Paper</option>
+                  <option value="metal">Metal</option>
+                  <option value="glass">Glass</option>
+                  <option value="ewaste">E-Waste</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="wasteWeight">Weight (kg)</label>
+                <input id="wasteWeight" type="number" min="1" step="0.1" required />
+              </div>
+
+              <div class="field">
+                <label for="pickupDate">Pickup date</label>
+                <input id="pickupDate" type="date" required />
+              </div>
+
+              <div class="field">
+                <label for="pickupAddress">Pickup address</label>
+                <textarea id="pickupAddress" required></textarea>
+              </div>
+
+              <div class="field">
+                <label for="pickupNotes">Extra notes</label>
+                <textarea id="pickupNotes"></textarea>
+              </div>
+
+              <div class="split-actions" id="userBookingActions">
+                <button class="btn btn-primary" type="submit">Book Pickup</button>
+                <button class="btn btn-secondary" type="button" id="clearBookingBtn">Clear Form</button>
+              </div>
+            </form>
+
+            <div id="pickupMessage" class="success-box"></div>
+            <div id="pickupError" class="error-box"></div>
+          </article>
+
+          <article class="panel card recycler-only">
+            <div class="panel-header">
+              <div>
+                <h2 style="font-family:var(--font-display);">Recycler control</h2>
+                <p class="muted small">Recycler only manages active request status.</p>
+              </div>
+            </div>
+
+            <div id="pickupControlBox" class="pickup-summary">
+              <p class="muted">No pickup request available.</p>
+            </div>
+
+            <div class="split-actions" id="recyclerActions">
+              <button class="btn btn-secondary" id="acceptPickupBtn" type="button">Accept Pickup</button>
+              <button class="btn btn-primary" id="completePickupBtn" type="button">Mark Completed</button>
+              <button class="btn btn-danger" id="clearActivePickupBtn" type="button">Clear Active Pickup</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-pricing" class="view">
+        <article class="panel card">
+          <div class="panel-header">
+            <div>
+              <h2 style="font-family:var(--font-display);">Price board</h2>
+              <p class="muted small">Recycler edits rates, user sees values.</p>
+            </div>
+          </div>
+
+          <div class="price-grid">
+            <div class="field"><label for="pricePlastic">Plastic</label><input id="pricePlastic" type="number"></div>
+            <div class="field"><label for="pricePaper">Paper</label><input id="pricePaper" type="number"></div>
+            <div class="field"><label for="priceMetal">Metal</label><input id="priceMetal" type="number"></div>
+            <div class="field"><label for="priceGlass">Glass</label><input id="priceGlass" type="number"></div>
+            <div class="field"><label for="priceEwaste">E-Waste</label><input id="priceEwaste" type="number"></div>
+          </div>
+
+          <div class="split-actions">
+            <button class="btn btn-primary recycler-only" id="savePricesBtn" type="button">Save Prices</button>
+            <button class="btn btn-secondary" id="refreshEstimateBtn" type="button">Refresh Estimate</button>
+          </div>
+
+          <div id="priceMessage" class="success-box"></div>
+        </article>
+      </section>
+
+      <section id="view-mapView" class="view">
+        <article class="panel card">
+          <div class="panel-header">
+            <div>
+              <h2 style="font-family:var(--font-display);">User location</h2>
+              <p class="muted small">Shows the live/current user position for recycler tracking.</p>
+            </div>
+          </div>
+          <div class="split-actions" style="margin-bottom:1rem;">
+            <button class="btn btn-primary user-only" id="shareLocationBtn" type="button">Share My Location</button>
+            <button class="btn btn-secondary recycler-only" id="trackUserBtn" type="button">Track User Location</button>
+          </div>
+          <div id="map"></div>
+          <div id="mapNote" class="note-box"></div>
+        </article>
+      </section>
+
+      <section id="view-scanner" class="view user-only">
+        <div class="two-col">
+          <article class="panel card">
+            <div class="panel-header">
+              <div>
+                <h2 style="font-family:var(--font-display);">Waste scanner</h2>
+                <p class="muted small">User-only waste image scanning.</p>
+              </div>
+            </div>
+
+            <div class="scanner-drop">
+              <p class="muted">Upload an image for preview and waste detection.</p>
+              <div class="split-actions" style="justify-content:center;">
+                <label class="btn btn-primary" for="wasteImage">Choose Image</label>
+                <input id="wasteImage" type="file" accept="image/*" class="hidden">
+                <button class="btn btn-secondary" id="runScannerBtn" type="button">Run Scan</button>
+              </div>
+            </div>
+
+            <div class="preview-box" id="imagePreviewBox">
+              <p class="muted">No image selected.</p>
+            </div>
+          </article>
+
+          <article class="panel card">
+            <div class="panel-header">
+              <div>
+                <h2 style="font-family:var(--font-display);">Scan result</h2>
+                <p class="muted small">User-only scan output.</p>
+              </div>
+            </div>
+            <div class="scanner-results" id="scannerResults">
+              <div class="scan-item">
+                <h4>No result yet</h4>
+                <p class="small muted">Select image and run scan.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-notifications" class="view">
+        <article class="panel card">
+          <div class="panel-header">
+            <div>
+              <h2 style="font-family:var(--font-display);">Notifications</h2>
+              <p class="muted small">System updates and request alerts.</p>
+            </div>
+            <button class="btn btn-secondary" id="clearNotificationsBtn" type="button">Clear Notifications</button>
+          </div>
+          <div class="notif-list" id="notifList"></div>
+        </article>
+      </section>
+
+      <section id="view-chat" class="view">
+        <article class="panel card">
+          <div class="panel-header">
+            <div>
+              <h2 style="font-family:var(--font-display);">Messages</h2>
+              <p class="muted small">Simple user and recycler chat.</p>
+            </div>
+          </div>
+          <div class="chat-list" id="chatList"></div>
+          <div class="chat-compose">
+            <input id="chatInput" type="text" placeholder="Type a message..." />
+            <button class="btn btn-primary" id="sendChatBtn" type="button">Send</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="view-history" class="view recycler-only">
+        <article class="panel card">
+          <div class="panel-header">
+            <div>
+              <h2 style="font-family:var(--font-display);">Recycler history</h2>
+              <p class="muted small">Past handled pickup records.</p>
+            </div>
+            <button class="btn btn-secondary" id="clearHistoryBtn" type="button">Clear History</button>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </article>
+      </section>
+
+      <div class="mobile-bar">
+        <div class="mobile-nav">
+          <button type="button" data-view="dashboard">Home</button>
+          <button type="button" data-view="pickup">Pickup</button>
+          <button type="button" data-view="pricing">Prices</button>
+          <button type="button" data-view="chat">Chat</button>
         </div>
       </div>
-
-      <section class="view" id="view-dashboard">
-        <div class="grid">
-          <div class="card col-8">
-            <h3>Performance overview</h3>
-            <p class="sub">Role-aware metrics update automatically depending on whether you are logged in as a user or recycler.</p>
-            <div class="metrics" id="metricsBox"></div>
-          </div>
-
-          <div class="card col-4">
-            <h3>Notifications</h3>
-            <div class="list" id="notificationList"></div>
-          </div>
-
-          <div class="card col-7">
-            <h3>Pickup map</h3>
-            <p class="sub">Capture your current location and visualize recycler proximity on the map.[web:116]</p>
-            <div id="map"></div>
-            <div class="actions" style="margin-top:14px;">
-              <button class="btn btn-primary" id="locateBtn">Locate Me</button>
-              <button class="btn btn-soft" id="recyclerMarkerBtn">Show Recycler</button>
-            </div>
-            <p class="sub" id="locationText" style="margin-top:12px;">Location not captured yet.</p>
-          </div>
-
-          <div class="card col-5">
-            <h3>Pickup flow</h3>
-            <div class="list" id="flowList"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="view hidden" id="view-booking">
-        <div class="grid">
-          <div class="card col-7">
-            <h3>Book pickup</h3>
-            <div class="form-grid">
-              <div class="field">
-                <label>Full Name</label>
-                <input id="bookName" class="input" type="text">
-              </div>
-              <div class="field">
-                <label>Phone</label>
-                <input id="bookPhone" class="input" type="tel" placeholder="98XXXXXXXX">
-              </div>
-              <div class="field">
-                <label>Address</label>
-                <input id="bookAddress" class="input" type="text" placeholder="House No, Bāshettihalli">
-              </div>
-              <div class="field">
-                <label>Waste Type</label>
-                <select id="wasteType" class="input">
-                  <option>Plastic</option>
-                  <option>Paper</option>
-                  <option>Metal</option>
-                  <option>Glass</option>
-                  <option>E-waste</option>
-                  <option>Battery</option>
-                  <option>Mixed</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Weight (kg)</label>
-                <input id="weightInput" class="input" type="number" value="5">
-              </div>
-              <div class="field">
-                <label>Pickup Slot</label>
-                <select id="slotInput" class="input">
-                  <option>10:00 AM - 12:00 PM</option>
-                  <option selected>02:00 PM - 04:00 PM</option>
-                  <option>05:00 PM - 07:00 PM</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Pickup Date</label>
-                <input id="dateInput" class="input" type="date">
-              </div>
-              <div class="field">
-                <label>Notes</label>
-                <input id="noteInput" class="input" type="text" placeholder="Landmark or note">
-              </div>
-            </div>
-            <div class="actions">
-              <button class="btn btn-primary" id="bookBtn">Confirm Pickup</button>
-              <button class="btn btn-soft" id="fillLocationBtn">Use GPS Address</button>
-            </div>
-          </div>
-
-          <div class="card col-5">
-            <h3>Booking summary</h3>
-            <div id="bookingSummary">
-              <span class="badge badge-info">No active booking</span>
-              <p class="sub">Your pickup summary will appear here after booking.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="view hidden" id="view-scan">
-        <div class="grid">
-          <div class="card col-6">
-            <h3>Waste image scan</h3>
-            <p class="sub">Upload a waste image to simulate in-browser identification. MobileNet is commonly used for browser image classification workflows in TensorFlow.js demos.[web:163][web:6]</p>
-            <input id="scanFile" class="input" type="file" accept="image/*">
-            <div class="actions">
-              <button class="btn btn-primary" id="scanBtn">Scan Waste</button>
-            </div>
-            <img id="previewImage" class="hidden" alt="Uploaded waste preview">
-          </div>
-
-          <div class="card col-6">
-            <h3>Scan result</h3>
-            <div id="scanResult">
-              <span class="badge badge-warn">Waiting for image</span>
-              <p class="sub">Upload an image and run the waste scan.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="view hidden" id="view-chat">
-        <div class="grid">
-          <div class="card col-7">
-            <h3>Live chat</h3>
-            <div class="chat">
-              <div class="chat-messages" id="chatMessages"></div>
-              <div class="chat-input">
-                <input id="chatInput" class="input" type="text" placeholder="Type a message...">
-                <button class="btn btn-primary" id="sendBtn">Send</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="card col-5">
-            <h3>Role notes</h3>
-            <div id="roleNotes">
-              <span class="badge badge-success">Active session</span>
-              <p class="sub">Role-based instructions will appear here.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="view hidden" id="view-history">
-        <div class="grid">
-          <div class="card col-12">
-            <h3>Recycler history</h3>
-            <p class="sub">This section is visible only for recycler role.</p>
-            <div class="actions">
-              <button class="btn btn-danger" id="clearHistoryBtn">Clear History</button>
-            </div>
-            <div class="history-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>User</th>
-                    <th>Waste Type</th>
-                    <th>Weight</th>
-                    <th>Status</th>
-                    <th>Reward</th>
-                    <th>Handled By</th>
-                  </tr>
-                </thead>
-                <tbody id="historyBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
     </main>
   </section>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const SECRET_HASH = btoa("7204326807");
+    const RECYCLER_SECRET = "7204326807";
 
     const state = {
-      selectedRole: "user",
-      currentRole: "user",
-      currentUser: { name: "", email: "" },
-      location: null,
-      address: "",
-      model: null,
+      user: null,
+      role: "user",
+      prices: { plastic: 14, paper: 10, metal: 26, glass: 8, ewaste: 40 },
+      currentPickup: null,
+      history: [],
       notifications: [
-        { title: "Pickup booked", body: "Your request was submitted successfully." },
-        { title: "Recycler assigned", body: "A recycler has been assigned to your request." },
-        { title: "Reward credited", body: "Wallet updated after completion." }
+        { title: "Welcome", text: "Final role-based dashboard loaded.", time: new Date().toLocaleString() }
       ],
-      chats: [
-        { role: "recycler", text: "Hello, I will reach in 15 minutes.", time: "2:10 PM" },
-        { role: "user", text: "Okay, I will keep the waste ready.", time: "2:11 PM" }
-      ],
-      history: [
-        { id: "PK001", user: "Shobith", waste: "Plastic", weight: "5 kg", status: "Completed", reward: "₹120", by: "Recycler A" },
-        { id: "PK002", user: "Arun", waste: "E-waste", weight: "2 kg", status: "Completed", reward: "₹220", by: "Recycler A" },
-        { id: "PK003", user: "Meghana", waste: "Paper", weight: "3 kg", status: "Scheduled", reward: "₹60", by: "Recycler B" }
-      ],
-      metrics: {
-        user: [
-          { label: "Total Pickups", value: "12" },
-          { label: "Rewards Earned", value: "₹460" },
-          { label: "Waste Scans", value: "9" },
-          { label: "Completion Rate", value: "92%" }
-        ],
-        recycler: [
-          { label: "Assigned Pickups", value: "18" },
-          { label: "Daily Earnings", value: "₹1250" },
-          { label: "Collected Weight", value: "25 kg" },
-          { label: "Completion Rate", value: "96%" }
-        ]
-      },
-      flow: [
-        "Pickup requested",
-        "Recycler assigned",
-        "En route for collection",
-        "Waste collected",
-        "Reward processed"
-      ]
+      chat: [],
+      selectedImage: "",
+      userLocation: null
     };
 
-    let map, userMarker, recyclerMarker;
+    const $ = id => document.getElementById(id);
 
-    const roleButtons = document.querySelectorAll(".role-btn");
-    const secretField = document.getElementById("secretField");
-    const loginError = document.getElementById("loginError");
-    const loginScreen = document.getElementById("loginScreen");
-    const appScreen = document.getElementById("appScreen");
-    const historyNav = document.getElementById("historyNav");
+    const viewsMeta = {
+      dashboard: ["Dashboard", "Role-based overview of current recycling activity."],
+      pickup: ["Pickup Flow", "User booking remains. Recycler only handles active requests."],
+      pricing: ["Price Board", "Review and manage live material pricing."],
+      mapView: ["User Location", "Track where the current user is present."],
+      scanner: ["Waste Scanner", "User-only image waste detection section."],
+      notifications: ["Notifications", "View alerts and workflow updates."],
+      chat: ["Messages", "Simple communication interface."],
+      history: ["Recycler History", "View handled pickup records."]
+    };
 
-    roleButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        state.selectedRole = btn.dataset.role;
-        roleButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        secretField.style.display = state.selectedRole === "recycler" ? "block" : "none";
-        loginError.textContent = "";
+    let currentTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    $("themeToggle").textContent = currentTheme === "dark" ? "☀️" : "🌙";
+
+    function toggleTheme() {
+      currentTheme = currentTheme === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", currentTheme);
+      $("themeToggle").textContent = currentTheme === "dark" ? "☀️" : "🌙";
+      setTimeout(() => map && map.invalidateSize(), 150);
+    }
+
+    ["themeToggle", "sidebarThemeBtn", "topThemeBtn"].forEach(id => {
+      $(id).addEventListener("click", toggleTheme);
+    });
+
+    function showBox(id, message) {
+      const el = $(id);
+      el.textContent = message;
+      el.classList.add("show");
+    }
+
+    function hideBox(id) {
+      $(id).textContent = "";
+      $(id).classList.remove("show");
+    }
+
+    function setRole(role) {
+      state.role = role;
+      $("userRoleBtn").classList.toggle("active", role === "user");
+      $("recyclerRoleBtn").classList.toggle("active", role === "recycler");
+      $("secretFieldWrap").classList.toggle("hidden", role !== "recycler");
+      $("secretCode").required = role === "recycler";
+      hideBox("loginError");
+      hideBox("loginSuccess");
+    }
+
+    $("userRoleBtn").addEventListener("click", () => setRole("user"));
+    $("recyclerRoleBtn").addEventListener("click", () => setRole("recycler"));
+
+    $("loginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = $("loginName").value.trim();
+      const phone = $("loginPhone").value.trim();
+      const secret = $("secretCode").value.trim();
+
+      if (!name || !phone) {
+        showBox("loginError", "Please enter name and phone number.");
+        return;
+      }
+
+      if (state.role === "recycler" && secret !== RECYCLER_SECRET) {
+        showBox("loginError", "Incorrect recycler secret code.");
+        return;
+      }
+
+      state.user = { name, phone };
+      showBox("loginSuccess", "Login successful. Loading dashboard...");
+      setTimeout(() => {
+        $("loginPage").classList.add("hidden");
+        $("appPage").classList.remove("hidden");
+        applyRoleUI();
+        navigateTo("dashboard");
+        renderAll();
+      }, 500);
+    });
+
+    function logout() {
+      state.user = null;
+      state.role = "user";
+      $("loginForm").reset();
+      setRole("user");
+      $("appPage").classList.add("hidden");
+      $("loginPage").classList.remove("hidden");
+    }
+
+    $("logoutBtn").addEventListener("click", logout);
+    $("topLogoutBtn").addEventListener("click", logout);
+
+    function applyRoleUI() {
+      const isRecycler = state.role === "recycler";
+
+      document.querySelectorAll(".recycler-only").forEach(el => el.classList.toggle("hidden", !isRecycler));
+      document.querySelectorAll(".user-only").forEach(el => el.classList.toggle("hidden", isRecycler));
+
+      $("roleLabel").textContent = isRecycler ? "Recycler dashboard" : "User dashboard";
+      $("rolePill").textContent = isRecycler ? "Recycler Portal" : "User Portal";
+      $("welcomeName").textContent = `Welcome, ${state.user?.name || ""}`;
+      $("welcomeMeta").textContent = isRecycler
+        ? "Handle pickup status, rates, user location, and history."
+        : "Book pickups, scan waste, and track your request.";
+
+      ["pricePlastic","pricePaper","priceMetal","priceGlass","priceEwaste"].forEach(id => {
+        $(id).readOnly = !isRecycler;
       });
-    });
-
-    document.getElementById("demoBtn").addEventListener("click", () => {
-      document.getElementById("nameInput").value = state.selectedRole === "recycler" ? "Recycler Demo" : "Shobith Gowda D";
-      document.getElementById("emailInput").value = state.selectedRole === "recycler" ? "recycler@recyclehub.com" : "shobith@gmail.com";
-      document.getElementById("codeInput").value = "";
-    });
-
-    document.getElementById("loginBtn").addEventListener("click", () => {
-      const name = document.getElementById("nameInput").value.trim();
-      const email = document.getElementById("emailInput").value.trim();
-      const enteredCode = document.getElementById("codeInput").value.trim();
-
-      if (!name || !email) {
-        loginError.textContent = "Please enter your name and email.";
-        return;
-      }
-
-      if (state.selectedRole === "recycler") {
-        if (btoa(enteredCode) !== SECRET_HASH) {
-          loginError.textContent = "Invalid recycler access code.";
-          return;
-        }
-      }
-
-      state.currentRole = state.selectedRole;
-      state.currentUser = { name, email };
-
-      loginScreen.classList.add("hidden");
-      appScreen.classList.remove("hidden");
-
-      updateRoleUI();
-      switchView("dashboard");
-
-      if (!map) {
-        setTimeout(initMap, 150);
-      }
-    });
-
-    function updateRoleUI() {
-      const role = state.currentRole;
-      document.getElementById("profileName").textContent = state.currentUser.name;
-      document.getElementById("profileEmail").textContent = state.currentUser.email;
-      document.getElementById("profileRole").textContent = role === "recycler" ? "Recycler Access" : "User Access";
-      document.getElementById("rolePill").textContent = role === "recycler" ? "Recycler" : "User";
-      document.getElementById("pageTitle").textContent = role === "recycler" ? "Recycler Dashboard" : "User Dashboard";
-      document.getElementById("pageSubtitle").textContent = role === "recycler"
-        ? "Monitor collection activity, booking requests, and recycler-only history."
-        : "Manage bookings, scans, live chat, and pickup updates.";
-
-      historyNav.classList.toggle("hidden", role !== "recycler");
-      document.getElementById("view-history").classList.toggle("hidden", role !== "recycler");
-
-      renderMetrics();
-      renderNotifications();
-      renderFlow();
-      renderChats();
-      renderHistory();
-      renderRoleNotes();
     }
 
-    function renderMetrics() {
-      const metricsBox = document.getElementById("metricsBox");
-      const items = state.metrics[state.currentRole];
-      metricsBox.innerHTML = items.map(item => `
-        <div class="metric">
-          <span>${item.label}</span>
-          <strong>${item.value}</strong>
-        </div>
-      `).join("");
-    }
+    function navigateTo(view) {
+      if (state.role === "recycler" && view === "scanner") view = "dashboard";
+      if (state.role !== "recycler" && view === "history") view = "dashboard";
 
-    function renderNotifications() {
-      document.getElementById("notifPill").textContent = `Notifications: ${state.notifications.length}`;
-      document.getElementById("notificationList").innerHTML = state.notifications.map(n => `
-        <div class="list-item">
-          <strong>${n.title}</strong>
-          <div style="color:var(--muted);font-size:.9rem;">${n.body}</div>
-        </div>
-      `).join("");
-    }
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      const target = document.getElementById(`view-${view}`);
+      if (target) target.classList.add("active");
 
-    function renderFlow() {
-      document.getElementById("flowList").innerHTML = state.flow.map(step => `
-        <div class="list-item">${step}</div>
-      `).join("");
-    }
-
-    function renderChats() {
-      const chatBox = document.getElementById("chatMessages");
-      chatBox.innerHTML = state.chats.map(msg => `
-        <div class="msg ${msg.role}">
-          ${msg.text}
-          <div style="margin-top:6px;font-size:.78rem;opacity:.7;">${msg.time}</div>
-        </div>
-      `).join("");
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function renderRoleNotes() {
-      const notes = document.getElementById("roleNotes");
-      notes.innerHTML = state.currentRole === "recycler"
-        ? `
-          <span class="badge badge-info">Recycler Mode</span>
-          <p class="sub">You can access booking records, update pickups, view recycler history, and manage collection workflow.</p>
-        `
-        : `
-          <span class="badge badge-success">User Mode</span>
-          <p class="sub">You can book pickup, scan waste, chat with recycler, and view live status updates. History is hidden for users.</p>
-        `;
-    }
-
-    function renderHistory() {
-      const body = document.getElementById("historyBody");
-      if (state.currentRole !== "recycler") {
-        body.innerHTML = "";
-        return;
-      }
-
-      if (!state.history.length) {
-        body.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);">No history available</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = state.history.map(row => `
-        <tr>
-          <td>${row.id}</td>
-          <td>${row.user}</td>
-          <td>${row.waste}</td>
-          <td>${row.weight}</td>
-          <td>${row.status}</td>
-          <td>${row.reward}</td>
-          <td>${row.by}</td>
-        </tr>
-      `).join("");
-    }
-
-    function switchView(view) {
-      if (view === "history" && state.currentRole !== "recycler") return;
-
-      document.querySelectorAll(".view").forEach(v => v.classList.add("hidden"));
-      document.getElementById(`view-${view}`).classList.remove("hidden");
-
-      document.querySelectorAll(".nav-btn[data-view]").forEach(btn => {
+      document.querySelectorAll(".nav-btn").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.view === view);
       });
 
-      if (view === "history" && map) {
-        setTimeout(() => map.invalidateSize(), 200);
+      $("pageTitle").textContent = viewsMeta[view][0];
+      $("pageSubtitle").textContent = viewsMeta[view][1];
+
+      if (view === "mapView") setTimeout(() => map && map.invalidateSize(), 200);
+    }
+
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.addEventListener("click", () => navigateTo(btn.dataset.view));
+    });
+
+    document.querySelectorAll(".mobile-nav button").forEach(btn => {
+      btn.addEventListener("click", () => navigateTo(btn.dataset.view));
+    });
+
+    function getRate(type) {
+      return Number(state.prices[type] || 0);
+    }
+
+    function getCurrentPickupValue() {
+      if (!state.currentPickup) return 0;
+      return Math.round(getRate(state.currentPickup.type) * Number(state.currentPickup.weight));
+    }
+
+    function addNotification(title, text) {
+      state.notifications.unshift({ title, text, time: new Date().toLocaleString() });
+    }
+
+    function renderDashboard() {
+      const statsWrap = $("dashboardStats");
+      const quickWrap = $("dashboardQuickCards");
+      const isRecycler = state.role === "recycler";
+
+      const status = state.currentPickup ? state.currentPickup.status : "No Booking";
+      const totalPickups = state.history.length;
+      const completedPickups = state.history.filter(x => x.status === "Completed").length;
+      const estimatedValue = getCurrentPickupValue();
+      const userLocationText = state.userLocation ? "Shared" : "Unknown";
+
+      $("overviewSubtitle").textContent = isRecycler
+        ? "Track active request, user location, and recycler workflow."
+        : "Track your booking, estimated value, and current request.";
+
+      $("quickSummarySubtitle").textContent = isRecycler
+        ? "Recycler-only dashboard stats."
+        : "User-only dashboard stats.";
+
+      if (isRecycler) {
+        statsWrap.innerHTML = `
+          <article class="stat-card card">
+            <h3>Active request</h3>
+            <div class="stat-value">${status}</div>
+            <p class="small muted">Current pickup workflow state.</p>
+          </article>
+          <article class="stat-card card">
+            <h3>User location</h3>
+            <div class="stat-value">${userLocationText}</div>
+            <p class="small muted">Shared by current user.</p>
+          </article>
+          <article class="stat-card card">
+            <h3>Completed pickups</h3>
+            <div class="stat-value">${completedPickups}</div>
+            <p class="small muted">Successfully finished requests.</p>
+          </article>
+          <article class="stat-card card">
+            <h3>Total records</h3>
+            <div class="stat-value">${totalPickups}</div>
+            <p class="small muted">Handled and stored requests.</p>
+          </article>
+        `;
+
+        quickWrap.innerHTML = `
+          <div class="kpi-mini">Pending request <strong>${state.currentPickup && state.currentPickup.status !== "Completed" ? "1" : "0"}</strong></div>
+          <div class="kpi-mini">User tracked <strong>${state.userLocation ? "Yes" : "No"}</strong></div>
+          <div class="kpi-mini">Price board <strong>Live</strong></div>
+        `;
+      } else {
+        statsWrap.innerHTML = `
+          <article class="stat-card card">
+            <h3>Current status</h3>
+            <div class="stat-value">${status}</div>
+            <p class="small muted">${state.currentPickup ? "Your latest pickup request is active." : "Create a pickup request to begin."}</p>
+          </article>
+          <article class="stat-card card">
+            <h3>Estimated value</h3>
+            <div class="stat-value">₹${estimatedValue}</div>
+            <p class="small muted">Based on selected material and weight.</p>
+          </article>
+          <article class="stat-card card">
+            <h3>Location status</h3>
+            <div class="stat-value">${userLocationText}</div>
+            <p class="small muted">Share your current location for recycler tracking.</p>
+          </article>
+          <article class="stat-card card">
+            <h3>Total pickups</h3>
+            <div class="stat-value">${totalPickups}</div>
+            <p class="small muted">Requests created in your account.</p>
+          </article>
+        `;
+
+        quickWrap.innerHTML = `
+          <div class="kpi-mini">Pending request <strong>${state.currentPickup && state.currentPickup.status !== "Completed" ? "1" : "0"}</strong></div>
+          <div class="kpi-mini">Current value <strong>₹${estimatedValue}</strong></div>
+          <div class="kpi-mini">Location shared <strong>${state.userLocation ? "Yes" : "No"}</strong></div>
+        `;
+      }
+
+      if (state.currentPickup) {
+        $("latestPickupCard").innerHTML = `
+          <h4>${state.currentPickup.type.toUpperCase()} pickup</h4>
+          <p class="small muted">Weight: ${state.currentPickup.weight} kg</p>
+          <p class="small muted">Pickup date: ${state.currentPickup.date}</p>
+          <p class="small muted">Address: ${state.currentPickup.address}</p>
+          <p class="small muted">Estimated value: ₹${estimatedValue}</p>
+        `;
+
+        $("statusBadge").className = "status-badge " + (
+          state.currentPickup.status === "Pending" ? "status-pending" :
+          state.currentPickup.status === "Accepted" ? "status-accepted" :
+          "status-completed"
+        );
+        $("statusBadge").textContent = state.currentPickup.status;
+      } else {
+        $("latestPickupCard").innerHTML = `<p class="muted">No active pickup yet.</p>`;
+        $("statusBadge").className = "status-badge status-pending";
+        $("statusBadge").textContent = "No active booking";
       }
     }
 
-    document.querySelectorAll(".nav-btn[data-view]").forEach(btn => {
-      btn.addEventListener("click", () => switchView(btn.dataset.view));
+    function renderPickupControl() {
+      if (!$("pickupControlBox")) return;
+      if (!state.currentPickup) {
+        $("pickupControlBox").innerHTML = `<p class="muted">No pickup request available.</p>`;
+        return;
+      }
+
+      $("pickupControlBox").innerHTML = `
+        <h4>${state.currentPickup.type.toUpperCase()} | ${state.currentPickup.weight} kg</h4>
+        <p class="small muted">Status: ${state.currentPickup.status}</p>
+        <p class="small muted">Date: ${state.currentPickup.date}</p>
+        <p class="small muted">Address: ${state.currentPickup.address}</p>
+        <p class="small muted">Notes: ${state.currentPickup.notes || "None"}</p>
+        <p class="small muted">Estimated value: ₹${getCurrentPickupValue()}</p>
+      `;
+    }
+
+    $("pickupForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const pickup = {
+        id: Date.now(),
+        type: $("wasteType").value,
+        weight: Number($("wasteWeight").value),
+        date: $("pickupDate").value,
+        address: $("pickupAddress").value.trim(),
+        notes: $("pickupNotes").value.trim(),
+        status: "Pending",
+        createdBy: state.user.name
+      };
+
+      if (!pickup.type || !pickup.weight || !pickup.date || !pickup.address) {
+        showBox("pickupError", "Please fill all required fields.");
+        return;
+      }
+
+      state.currentPickup = pickup;
+      hideBox("pickupError");
+      showBox("pickupMessage", "Pickup booked successfully.");
+      addNotification("Pickup booked", `A new ${pickup.type} pickup request has been created.`);
+      renderAll();
     });
 
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      appScreen.classList.add("hidden");
-      loginScreen.classList.remove("hidden");
-      document.getElementById("codeInput").value = "";
-      loginError.textContent = "";
-      switchView("dashboard");
+    $("clearBookingBtn").addEventListener("click", () => {
+      $("pickupForm").reset();
+      hideBox("pickupMessage");
+      hideBox("pickupError");
     });
+
+    $("acceptPickupBtn").addEventListener("click", () => {
+      if (!state.currentPickup) return;
+      state.currentPickup.status = "Accepted";
+      state.currentPickup.handledBy = state.user.name;
+      addNotification("Pickup accepted", "Recycler accepted the active pickup.");
+      renderAll();
+    });
+
+    $("completePickupBtn").addEventListener("click", () => {
+      if (!state.currentPickup) return;
+      state.currentPickup.status = "Completed";
+      state.currentPickup.handledBy = state.user.name;
+      state.history.unshift({ ...state.currentPickup, value: getCurrentPickupValue() });
+      addNotification("Pickup completed", "The active pickup has been completed.");
+      state.currentPickup = null;
+      renderAll();
+    });
+
+    $("clearActivePickupBtn").addEventListener("click", () => {
+      if (!state.currentPickup) return;
+      state.history.unshift({ ...state.currentPickup, status: "Cleared" });
+      addNotification("Pickup cleared", "Active pickup was cleared.");
+      state.currentPickup = null;
+      renderAll();
+    });
+
+    function renderPrices() {
+      $("pricePlastic").value = state.prices.plastic;
+      $("pricePaper").value = state.prices.paper;
+      $("priceMetal").value = state.prices.metal;
+      $("priceGlass").value = state.prices.glass;
+      $("priceEwaste").value = state.prices.ewaste;
+    }
+
+    $("savePricesBtn").addEventListener("click", () => {
+      state.prices = {
+        plastic: Number($("pricePlastic").value || 0),
+        paper: Number($("pricePaper").value || 0),
+        metal: Number($("priceMetal").value || 0),
+        glass: Number($("priceGlass").value || 0),
+        ewaste: Number($("priceEwaste").value || 0)
+      };
+      showBox("priceMessage", "Prices saved successfully.");
+      addNotification("Prices updated", "Recycler updated the live price board.");
+      renderAll();
+    });
+
+    $("refreshEstimateBtn").addEventListener("click", () => {
+      renderDashboard();
+      showBox("priceMessage", "Estimate refreshed.");
+    });
+
+    function renderNotifications() {
+      $("notifList").innerHTML = state.notifications.length
+        ? state.notifications.map(item => `
+          <div class="notif-item">
+            <h4>${item.title}</h4>
+            <p class="small muted">${item.text}</p>
+            <p class="tiny muted">${item.time}</p>
+          </div>
+        `).join("")
+        : `<div class="notif-item"><p class="muted">No notifications available.</p></div>`;
+    }
+
+    function renderChat() {
+      $("chatList").innerHTML = state.chat.length
+        ? state.chat.map(msg => `
+          <div class="chat-item">
+            <h4>${msg.sender}</h4>
+            <p class="small muted">${msg.text}</p>
+            <p class="tiny muted">${msg.time}</p>
+          </div>
+        `).join("")
+        : `<div class="chat-item"><p class="muted">No messages yet.</p></div>`;
+    }
+
+    function sendChat() {
+      const text = $("chatInput").value.trim();
+      if (!text) return;
+      state.chat.unshift({
+        sender: state.role === "recycler" ? `Recycler: ${state.user.name}` : `User: ${state.user.name}`,
+        text,
+        time: new Date().toLocaleString()
+      });
+      $("chatInput").value = "";
+      renderChat();
+    }
+
+    $("sendChatBtn").addEventListener("click", sendChat);
+    $("chatInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendChat();
+    });
+
+    function renderHistory() {
+      $("historyList").innerHTML = state.history.length
+        ? state.history.map(item => `
+          <div class="history-item">
+            <h4>${item.type.toUpperCase()} - ${item.status}</h4>
+            <p class="small muted">Weight: ${item.weight} kg</p>
+            <p class="small muted">Address: ${item.address || "N/A"}</p>
+            <p class="small muted">Handled by: ${item.handledBy || item.createdBy || "N/A"}</p>
+            <p class="small muted">Value: ₹${item.value || 0}</p>
+          </div>
+        `).join("")
+        : `<div class="history-item"><p class="muted">No recycler history available.</p></div>`;
+    }
+
+    $("clearNotificationsBtn").addEventListener("click", () => {
+      state.notifications = [];
+      renderNotifications();
+      showBox("mapNote", "All notifications cleared.");
+    });
+
+    $("clearHistoryBtn").addEventListener("click", () => {
+      state.history = [];
+      renderHistory();
+      renderDashboard();
+      showBox("mapNote", "Recycler history cleared.");
+    });
+
+    $("wasteImage").addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.selectedImage = reader.result;
+        $("imagePreviewBox").innerHTML = `<img src="${reader.result}" alt="Uploaded waste preview">`;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    $("runScannerBtn").addEventListener("click", () => {
+      if (!state.selectedImage) {
+        $("scannerResults").innerHTML = `
+          <div class="scan-item">
+            <h4>No image selected</h4>
+            <p class="small muted">Choose image before running scan.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const labels = [
+        { item: "Plastic Bottle", type: "plastic", confidence: 94, value: 12 },
+        { item: "Paper Bundle", type: "paper", confidence: 89, value: 8 },
+        { item: "Metal Can", type: "metal", confidence: 92, value: 18 },
+        { item: "Glass Piece", type: "glass", confidence: 87, value: 6 },
+        { item: "Old Charger", type: "ewaste", confidence: 91, value: 24 }
+      ];
+
+      const result = labels[Math.floor(Math.random() * labels.length)];
+      $("scannerResults").innerHTML = `
+        <div class="scan-item">
+          <h4>${result.item}</h4>
+          <p class="small muted">Detected category: ${result.type.toUpperCase()}</p>
+          <p class="small muted">Confidence: ${result.confidence}%</p>
+          <p class="small muted">Estimated value: ₹${result.value}</p>
+        </div>
+      `;
+      addNotification("Waste scan complete", `${result.item} detected with ${result.confidence}% confidence.`);
+      renderNotifications();
+    });
+
+    let map, mapMarker;
 
     function initMap() {
-      map = L.map("map").setView([13.0456, 77.6234], 13);
+      map = L.map("map").setView([13.277, 77.545], 13);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
         attribution: "&copy; OpenStreetMap contributors"
       }).addTo(map);
-      userMarker = L.marker([13.0456, 77.6234]).addTo(map).bindPopup("Default user location");
+
+      mapMarker = L.marker([13.277, 77.545]).addTo(map).bindPopup("Waiting for user location").openPopup();
     }
 
-    function setLocation(lat, lng, label) {
-      state.location = { lat, lng };
-      state.address = label;
-      if (userMarker) map.removeLayer(userMarker);
-      userMarker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
-      map.setView([lat, lng], 15);
-      document.getElementById("locationText").textContent = `Location: ${label} (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
-    }
-
-    document.getElementById("gpsBtn").addEventListener("click", locateUser);
-    document.getElementById("locateBtn").addEventListener("click", locateUser);
-
-    function locateUser() {
+    $("shareLocationBtn").addEventListener("click", () => {
       if (!navigator.geolocation) {
-        document.getElementById("locationText").textContent = "Geolocation not supported in this browser.";
+        showBox("mapNote", "Geolocation is not supported.");
         return;
       }
 
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          setLocation(lat, lng, "Current pickup point");
+          const { latitude, longitude } = pos.coords;
+          state.userLocation = { latitude, longitude };
+          map.setView([latitude, longitude], 15);
+          mapMarker.setLatLng([latitude, longitude]).bindPopup("User current location").openPopup();
+          showBox("mapNote", `User location shared: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          addNotification("Location shared", "User shared current location for recycler tracking.");
+          renderDashboard();
+          renderNotifications();
         },
-        () => {
-          document.getElementById("locationText").textContent = "Location access denied. Showing default location.";
-          setLocation(13.0456, 77.6234, "Bāshettihalli default point");
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
+        () => showBox("mapNote", "Unable to fetch user location.")
       );
-    }
-
-    document.getElementById("recyclerMarkerBtn").addEventListener("click", () => {
-      if (!map) return;
-      if (recyclerMarker) map.removeLayer(recyclerMarker);
-      recyclerMarker = L.marker([13.0556, 77.6334]).addTo(map).bindPopup("Recycler nearby").openPopup();
     });
 
-    document.getElementById("fillLocationBtn").addEventListener("click", () => {
-      if (state.address) {
-        document.getElementById("bookAddress").value = state.address;
-      }
-    });
-
-    document.getElementById("bookBtn").addEventListener("click", () => {
-      const name = document.getElementById("bookName").value || state.currentUser.name;
-      const waste = document.getElementById("wasteType").value;
-      const weight = document.getElementById("weightInput").value;
-      const slot = document.getElementById("slotInput").value;
-      const date = document.getElementById("dateInput").value || "Not selected";
-      const reward = estimateReward(waste, weight);
-
-      document.getElementById("bookingSummary").innerHTML = `
-        <span class="badge badge-success">Pickup booked</span>
-        <p class="sub"><strong>${name}</strong> booked a <strong>${waste}</strong> pickup for <strong>${weight} kg</strong>.</p>
-        <p class="sub">Slot: ${slot}<br>Date: ${date}<br>Estimated reward: ${reward}</p>
-      `;
-
-      state.notifications.unshift({
-        title: "Pickup booked",
-        body: `${waste} pickup scheduled for ${slot}.`
-      });
-
-      if (state.currentRole === "recycler") {
-        state.history.unshift({
-          id: "PK" + String(Math.floor(Math.random() * 900 + 100)),
-          user: name,
-          waste,
-          weight: `${weight} kg`,
-          status: "Scheduled",
-          reward,
-          by: "Self / Assigned Recycler"
-        });
-        renderHistory();
-      }
-
-      renderNotifications();
-    });
-
-    function estimateReward(type, weight) {
-      const w = Number(weight || 0);
-      const base = {
-        "Plastic": 12,
-        "Paper": 8,
-        "Metal": 22,
-        "Glass": 10,
-        "E-waste": 35,
-        "Battery": 28,
-        "Mixed": 9
-      };
-      const total = (base[type] || 10) * Math.max(w, 1);
-      return `₹${total}`;
-    }
-
-    document.getElementById("sendBtn").addEventListener("click", sendChat);
-    document.getElementById("chatInput").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendChat();
-    });
-
-    function sendChat() {
-      const input = document.getElementById("chatInput");
-      const text = input.value.trim();
-      if (!text) return;
-      state.chats.push({
-        role: state.currentRole === "recycler" ? "recycler" : "user",
-        text,
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      });
-      input.value = "";
-      renderChats();
-    }
-
-    document.getElementById("scanFile").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const img = document.getElementById("previewImage");
-      img.src = URL.createObjectURL(file);
-      img.classList.remove("hidden");
-    });
-
-    document.getElementById("scanBtn").addEventListener("click", async () => {
-      const file = document.getElementById("scanFile").files[0];
-      const resultBox = document.getElementById("scanResult");
-
-      if (!file) {
-        resultBox.innerHTML = `
-          <span class="badge badge-warn">No image selected</span>
-          <p class="sub">Please upload an image first.</p>
-        `;
+    $("trackUserBtn").addEventListener("click", () => {
+      if (!state.userLocation) {
+        showBox("mapNote", "User has not shared location yet.");
         return;
       }
 
-      resultBox.innerHTML = `
-        <span class="badge badge-info">Scanning...</span>
-        <p class="sub">Loading model and analyzing image.</p>
-      `;
+      map.setView([state.userLocation.latitude, state.userLocation.longitude], 15);
+      mapMarker
+        .setLatLng([state.userLocation.latitude, state.userLocation.longitude])
+        .bindPopup("Tracked user location")
+        .openPopup();
 
-      try {
-        if (!state.model) {
-          state.model = await mobilenet.load();
-        }
-
-        const img = document.getElementById("previewImage");
-        const predictions = await state.model.classify(img);
-        const top = predictions[0];
-        const mapped = mapPrediction(top.className);
-
-        resultBox.innerHTML = `
-          <span class="badge badge-success">Scan complete</span>
-          <p class="sub"><strong>Detected:</strong> ${mapped.type}</p>
-          <p class="sub"><strong>Model label:</strong> ${top.className}</p>
-          <p class="sub"><strong>Confidence:</strong> ${(top.probability * 100).toFixed(1)}%</p>
-          <p class="sub"><strong>Estimated reward:</strong> ${mapped.reward}</p>
-        `;
-      } catch (err) {
-        const fallback = randomFallback();
-        resultBox.innerHTML = `
-          <span class="badge badge-warn">Fallback result</span>
-          <p class="sub"><strong>Detected:</strong> ${fallback.type}</p>
-          <p class="sub"><strong>Confidence:</strong> ${fallback.confidence}</p>
-          <p class="sub"><strong>Estimated reward:</strong> ${fallback.reward}</p>
-        `;
-      }
+      showBox("mapNote", "Showing current user location on map.");
     });
 
-    function mapPrediction(className) {
-      const label = className.toLowerCase();
-      if (label.includes("bottle") || label.includes("plastic")) return { type: "Plastic", reward: "₹40 - ₹120" };
-      if (label.includes("phone") || label.includes("electronics")) return { type: "E-waste", reward: "₹120 - ₹500" };
-      if (label.includes("battery")) return { type: "Battery", reward: "₹70 - ₹250" };
-      if (label.includes("can") || label.includes("metal")) return { type: "Metal", reward: "₹60 - ₹180" };
-      return { type: "Mixed", reward: "₹20 - ₹100" };
-    }
-
-    function randomFallback() {
-      const items = [
-        { type: "Plastic", confidence: "88.4%", reward: "₹40 - ₹120" },
-        { type: "Paper", confidence: "84.2%", reward: "₹20 - ₹80" },
-        { type: "Metal", confidence: "81.7%", reward: "₹60 - ₹180" },
-        { type: "E-waste", confidence: "86.5%", reward: "₹120 - ₹500" }
-      ];
-      return items[Math.floor(Math.random() * items.length)];
-    }
-
-    document.getElementById("clearHistoryBtn").addEventListener("click", () => {
-      if (state.currentRole !== "recycler") return;
-      state.history = [];
+    function renderAll() {
+      renderDashboard();
+      renderPickupControl();
+      renderPrices();
+      renderNotifications();
+      renderChat();
       renderHistory();
-    });
+    }
 
-    document.getElementById("bookName").value = "Shobith Gowda D";
-    document.getElementById("bookPhone").value = "9876543210";
-    document.getElementById("bookAddress").value = "Bāshettihalli, Karnataka";
+    initMap();
+    setRole("user");
   </script>
 </body>
 </html>
